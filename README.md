@@ -85,7 +85,7 @@ Example
 The following example is shows an interactive node session using this module to execute Test Case 3 from the NIST [GCM revised spec][GCMr]:
 
 ``` javascript
-> gcm = require('node_aes_gcm')
+> gcm = require('node-aes-gcm')
 { encrypt: [Function], decrypt: [Function] }
 > key = new Buffer([0xfe,0xff,0xe9,0x92,0x86,0x65,0x73,0x1c,0x6d,0x6a,0x8f,0x94,0x67,0x30,0x83,0x08])
 <Buffer fe ff e9 92 86 65 73 1c 6d 6a 8f 94 67 30 83 08>

@@ -1,0 +1,27 @@
+{
+  "name": "node-aes-gcm",
+  "version": "0.1.0",
+  "description": "AES GCM module for node.js that takes advantage of GCM authentication",
+  "main": "build/Release/node_aes_gcm.node",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xorbit/node-aes-gcm.git"
+  },
+  "keywords": [
+    "AES",
+    "GCM",
+    "authentication tag",
+    "Galois Counter Mode",
+    "additional authenticated data",
+    "AAD"
+  ],
+  "author": "Patrick Van Oosterwijck",
+  "license": "MIT",
+  "gypfile": true,
+  "readmeFilename": "README.md",
+  "gitHead": "2cb14a93ec28eaed98fcedb0d78a2752ce7b75d4"
+}
