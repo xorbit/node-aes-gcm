@@ -38,9 +38,9 @@ encrypt
 * `plaintext` is a `Buffer` object containing the plaintext to be encrypted.
 * `aad` is a `Buffer` object containing the additional authenticated data that is not encrypted but is anthenticated by the authentication tag.
 
-All parameters are required.  If a parameter is not used (which may be the case often for aad), an empty buffer should be specified (for example: `new Buffer([])`).
+All parameters are required.  If a parameter is not used (which may often be the case for `aad`), an empty buffer should be specified (for example: `new Buffer([])`).
 
-The `encrypt` function returns an object containing the following keys:
+The `encrypt` function returns an object containing the following items:
 
 ``` javascript
 {
@@ -65,9 +65,9 @@ decrypt
 * `aad` is a `Buffer` object containing the additional authenticated data that was used when encryption was done and that is hashed into the authentication tag.
 * `auth_tag` is a 16-byte `Buffer` object containing the authentication tag that verifies the correctness and authenticity of both the encrypted data end the additional authenticated data.
 
-All parameters are required.  If a parameter is not used (which may be the case often for aad), an empty buffer should be specified (for example: `new Buffer([])`).
+All parameters are required.  If a parameter is not used (which may often be the case for `aad`), an empty buffer should be specified (for example: `new Buffer([])`).
 
-The `decrypt` function returns an object containing the following keys:
+The `decrypt` function returns an object containing the following items:
 
 ``` javascript
 {
