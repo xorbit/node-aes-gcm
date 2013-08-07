@@ -3,10 +3,19 @@ node-aes-gcm
 
 [AES][] [GCM][] module for [node.js][node] using OpenSSL
 
-[AES][http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf]
-[GCM][http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf]
-[GCMr][http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf]
-[node][http://nodejs.org]
+[AES]: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+[GCM]: http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
+[GCMr]: http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf
+[node]: http://nodejs.org
+
+Installation
+------------
+
+`node-aes-gcm` is available through npm:
+
+``` bash
+$ npm install node-aes-gcm
+```
 
 Rationale
 ---------
@@ -24,10 +33,10 @@ encrypt
 
 #### encrypt(key, iv, plaintext, aad)
 
-`key` is a 16-byte `Buffer` object containing the [AES][] key used for encryption.
-`iv` is a 12-byte `Buffer` object containing the initialization vector.
-`plaintext` is a `Buffer` object containing the plaintext to be encrypted.
-`aad` is a `Buffer` object containing the additional authenticated data that is not encrypted but is anthenticated by the authentication tag.
+* `key` is a 16-byte `Buffer` object containing the [AES][] key used for encryption.
+* `iv` is a 12-byte `Buffer` object containing the initialization vector.
+* `plaintext` is a `Buffer` object containing the plaintext to be encrypted.
+* `aad` is a `Buffer` object containing the additional authenticated data that is not encrypted but is anthenticated by the authentication tag.
 
 All parameters are required.  If a parameter is not used (which may be the case often for aad), an empty buffer should be specified (for example: `new Buffer([])`).
 
@@ -40,8 +49,8 @@ The `encrypt` function returns an object containing the following keys:
 }
 ```
 
-`ciphertext` is a `Buffer` object containing the encrypted data.
-`auth_tag` is a 16-byte `Buffer` object containing the authentication tag that is used by the `decrypt` function to verify the correctness and authenticity of both the encrypted data and the additional authenticated data.
+* `ciphertext` is a `Buffer` object containing the encrypted data.
+* `auth_tag` is a 16-byte `Buffer` object containing the authentication tag that is used by the `decrypt` function to verify the correctness and authenticity of both the encrypted data and the additional authenticated data.
 
 decrypt
 -------
@@ -50,11 +59,11 @@ decrypt
 
 #### decrypt(key, iv, ciphertext, aad, auth_tag)
 
-`key` is a 16-byte `Buffer` object containing the [AES][] key used for encryption.
-`iv` is a 12-byte `Buffer` object containing the initialization vector.
-`ciphertext` is a `Buffer` object containing the ciphertext to be decrypted.
-`aad` is a `Buffer` object containing the additional authenticated data that was used when encryption was done and that is hashed into the authentication tag.
-`auth_tag` is a 16-byte `Buffer` object containing the authentication tag that verifies the correctness and authenticity of both the encrypted data end the additional authenticated data.
+* `key` is a 16-byte `Buffer` object containing the [AES][] key used for encryption.
+* `iv` is a 12-byte `Buffer` object containing the initialization vector.
+* `ciphertext` is a `Buffer` object containing the ciphertext to be decrypted.
+* `aad` is a `Buffer` object containing the additional authenticated data that was used when encryption was done and that is hashed into the authentication tag.
+* `auth_tag` is a 16-byte `Buffer` object containing the authentication tag that verifies the correctness and authenticity of both the encrypted data end the additional authenticated data.
 
 All parameters are required.  If a parameter is not used (which may be the case often for aad), an empty buffer should be specified (for example: `new Buffer([])`).
 
@@ -67,8 +76,8 @@ The `decrypt` function returns an object containing the following keys:
 }
 ```
 
-`plaintext` is a `Buffer` object containing the decrypted data.
-`auth_ok` is a Boolean indicating whether the encrypted data and additional authenticated data passed verification (`true`) or failed (`false`).
+* `plaintext` is a `Buffer` object containing the decrypted data.
+* `auth_ok` is a Boolean indicating whether the encrypted data and additional authenticated data passed verification (`true`) or failed (`false`).
 
 Example
 -------
@@ -76,7 +85,7 @@ Example
 The following example is shows an interactive node session using this module to execute Test Case 3 from the NIST [GCM revised spec][GCMr]:
 
 ``` javascript
-> gcm = require('./build/Release/node_aes_gcm')
+> gcm = require('node_aes_gcm')
 { encrypt: [Function], decrypt: [Function] }
 > key = new Buffer([0xfe,0xff,0xe9,0x92,0x86,0x65,0x73,0x1c,0x6d,0x6a,0x8f,0x94,0x67,0x30,0x83,0x08])
 <Buffer fe ff e9 92 86 65 73 1c 6d 6a 8f 94 67 30 83 08>
