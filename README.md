@@ -23,11 +23,11 @@ $ npm install node-aes-gcm
 Rationale
 ---------
 
-The reason for the existence of this module is that the [node.js][node] [crypto][] module does not seem to expose a way to use the ability of [GCM (Galois Counter Mode)][GCM] to perform both encryption and authentication simultaneously.  This functionality is available in [OpenSSL][] 1.0+, so this module provides a thin wrapper around OpenSSL to expose this functionality for use in node.js.
+The reason for the existence of this module is that the [node.js][node] [crypto][] module does not seem to expose a way to use the ability of [GCM (Galois Counter Mode)][GCM] to perform both encryption and authentication simultaneously.  This functionality is available in [OpenSSL][] 1.0+, so this module provides a thin wrapper around [OpenSSL][] to expose this functionality for use in [node.js][node].
 
-[GCM][] is a useful mode to communicate securely with small embedded devices, because of its low operating overhead.  When combined with [node.js][], large scalable systems can be designed. Another advantage is that it is unencumbered by patents.
+[GCM][] is a useful mode to communicate securely with small embedded devices, because of its low operating overhead.  When combined with [node.js][node], large scalable systems can be designed. Another advantage is that it is unencumbered by patents.
 
-This module was written for my own use and is not designed to be extremely flexible, but to provide support for the most common use case of [GCM][] in embedded systems.  It uses the [AES-128[AES] cipher (128-bit key), supports a 96-bit [initialization vector][IV] (IV), and generates a 128-bit authentication tag.  It does include support for additional authenticated data (AAD).
+This module was written for my own use and is not designed to be extremely flexible, but to provide support for the most common use case of [GCM][] in embedded systems.  It uses the [AES-128][AES] cipher (128-bit key), supports a 96-bit [initialization vector][IV] (IV), and generates a 128-bit authentication tag.  It does include support for additional authenticated data (AAD).
 
 The module exports 2 functions: `encrypt` and `decrypt`.
 
