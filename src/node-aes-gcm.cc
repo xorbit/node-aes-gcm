@@ -102,7 +102,7 @@ Handle<Value> GcmEncrypt(const Arguments& args) {
   // key and IV
   int outl;
   EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-  EVP_EncryptInit(ctx, EVP_aes_128_gcm(),
+  EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL,
                     (unsigned char *)Buffer::Data(args[0]),
                     (unsigned char *)Buffer::Data(args[1]));
   // Pass additional authenticated data
@@ -117,7 +117,7 @@ Handle<Value> GcmEncrypt(const Arguments& args) {
                     (unsigned char *)Buffer::Data(args[2]),
                     Buffer::Length(args[2]));
   // Finalize
-  EVP_EncryptFinal(ctx, auth_tag, &outl);
+  EVP_EncryptFinal_ex(ctx, ciphertext + outl, &outl);
   // Get the authentication tag
   EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, AUTH_TAG_LEN, auth_tag);
   // Free the OpenSSL interface structure
@@ -166,7 +166,7 @@ Handle<Value> GcmDecrypt(const Arguments& args) {
   // key and IV
   int outl;
   EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-  EVP_DecryptInit(ctx, EVP_aes_128_gcm(),
+  EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL,
                     (unsigned char *)Buffer::Data(args[0]),
                     (unsigned char *)Buffer::Data(args[1]));
   // Set the input reference authentication tag
@@ -187,8 +187,8 @@ Handle<Value> GcmDecrypt(const Arguments& args) {
   EVP_DecryptUpdate(ctx, plaintext, &outl,
                     (unsigned char *)Buffer::Data(args[2]),
                     Buffer::Length(args[2]));
-  // Finalize and check whether authentication tag matched
-  bool auth_ok = EVP_DecryptFinal(ctx, auth_tag, &outl);
+  // Finalize
+  bool auth_ok = EVP_DecryptFinal_ex(ctx, plaintext + outl, &outl);
   // Free the OpenSSL interface structure
   EVP_CIPHER_CTX_free(ctx);
 

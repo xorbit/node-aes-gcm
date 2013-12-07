@@ -22,6 +22,5 @@
   "author": "Patrick Van Oosterwijck",
   "license": "MIT",
   "gypfile": true,
-  "readmeFilename": "README.md",
-  "gitHead": "2cb14a93ec28eaed98fcedb0d78a2752ce7b75d4"
+  "readmeFilename": "README.md"
 }
