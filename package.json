@@ -1,6 +1,6 @@
 {
   "name": "node-aes-gcm",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AES GCM module for node.js that takes advantage of GCM authentication",
   "main": "build/Release/node_aes_gcm.node",
   "scripts": {
