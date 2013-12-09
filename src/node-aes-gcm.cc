@@ -159,8 +159,6 @@ Handle<Value> GcmDecrypt(const Arguments& args) {
   size_t ciphertext_len = Buffer::Length(args[2]);
   size_t plaintext_len = (((ciphertext_len - 1) / 16) + 1) * 16;
   unsigned char *plaintext = new unsigned char[plaintext_len];
-  // Make a authentication tag buffer
-  unsigned char *auth_tag = new unsigned char[AUTH_TAG_LEN];
 
   // Init OpenSSL interace with 128-bit AES GCM cipher and give it the
   // key and IV
@@ -181,7 +179,7 @@ Handle<Value> GcmDecrypt(const Arguments& args) {
   // return NULL for empty buffers, and NULL makes update not work as we
   // expect it to.  So we force a valid non-NULL pointer for empty buffers.
   EVP_DecryptUpdate(ctx, NULL, &outl, Buffer::Length(args[3]) ?
-                    (unsigned char *)Buffer::Data(args[3]) : auth_tag,
+                    (unsigned char *)Buffer::Data(args[3]) : plaintext,
                     Buffer::Length(args[3]));
   // Decrypt ciphertext
   EVP_DecryptUpdate(ctx, plaintext, &outl,
