@@ -171,7 +171,7 @@ Handle<Value> GcmDecrypt(const Arguments& args) {
   EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, AUTH_TAG_LEN,
                     Buffer::Data(args[4]));
   // Example showed we needed to do init again
-  EVP_DecryptInit(ctx, NULL,
+  EVP_DecryptInit_ex(ctx, NULL, NULL,
                     (unsigned char *)Buffer::Data(args[0]),
                     (unsigned char *)Buffer::Data(args[1]));
   // Pass additional authenticated data
