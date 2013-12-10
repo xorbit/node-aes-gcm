@@ -1,11 +1,10 @@
 {
   "name": "node-aes-gcm",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "AES GCM module for node.js that takes advantage of GCM authentication",
   "main": "build/Release/node_aes_gcm.node",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "node-gyp rebuild"
+    "test": "mocha -R spec"
   },
   "repository": {
     "type": "git",
@@ -15,9 +14,6 @@
     "should": "2.1.x",
     "buffertools": "1.1.x",
     "mocha": "1.15.x"
-  },
-  "scripts": {
-    "test": "mocha -R spec"
   },
   "keywords": [
     "AES",
