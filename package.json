@@ -11,6 +11,14 @@
     "type": "git",
     "url": "https://github.com/xorbit/node-aes-gcm.git"
   },
+  "devDependencies": {
+    "should": "2.1.x",
+    "buffertools": "1.1.x",
+    "mocha": "1.15.x"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  },
   "keywords": [
     "AES",
     "GCM",
