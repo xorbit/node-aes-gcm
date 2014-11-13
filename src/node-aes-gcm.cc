@@ -21,8 +21,7 @@
 //
  
 #include <node.h>
-#include <node_buffer.h>
-#include <v8.h>
+#include <nan.h>
 #include <openssl/evp.h>
 
 using namespace v8;
@@ -34,50 +33,12 @@ using namespace node;
 #define AUTH_TAG_LEN  16
 
 
-// Exception shortcut
-
-Handle<Value> VException(const char *msg) {
-    HandleScope scope;
-    return ThrowException(Exception::Error(String::New(msg)));
-}
-
-// Free callback to release memory once a Buffer created by MakeBuffer
-// is released
-
-void FreeCallback(char *data, void *hint) {
-  delete [] data;
-}
-
-// Helper function to create a Buffer
-// Source: https://gist.github.com/drewish/2732711
-// Adjusted to prevent save memcpy from source data into Buffer
-
-static Local<Object> MakeBuffer(unsigned char *data, size_t size) {
-  HandleScope scope;
-   
-  // It ends up being kind of a pain to convert a slow buffer into a fast
-  // one since the fast part is implemented in JavaScript.
-  Local<Buffer> slowBuffer = Buffer::New((char *)data, size,
-                                          FreeCallback, NULL);
-  // First get the Buffer from global scope...
-  Local<Object> global = Context::GetCurrent()->Global();
-  Local<Value> bv = global->Get(String::NewSymbol("Buffer"));
-  assert(bv->IsFunction());
-  Local<Function> b = Local<Function>::Cast(bv);
-  // ...call Buffer() with the slow buffer and get a fast buffer back...
-  Handle<Value> argv[3] = { slowBuffer->handle_, Integer::New(size),
-                            Integer::New(0) };
-  Local<Object> fastBuffer = b->NewInstance(3, argv);
-   
-  return scope.Close(fastBuffer);
-}
-
 // Perform GCM mode AES-128 encryption using the provided key, IV, plaintext
 // and auth_data buffers, and return an object containing "ciphertext"
 // and "auth_tag" buffers.
 
-Handle<Value> GcmEncrypt(const Arguments& args) {
-  HandleScope scope;
+NAN_METHOD(GcmEncrypt) {
+  NanScope();
 
   // We want 4 buffer arguments, key needs to be 16 bytes and IV needs to be
   // 12 bytes
@@ -85,7 +46,7 @@ Handle<Value> GcmEncrypt(const Arguments& args) {
       !Buffer::HasInstance(args[1]) || !Buffer::HasInstance(args[2]) ||
       !Buffer::HasInstance(args[3]) || Buffer::Length(args[0]) != 16 ||
       Buffer::Length(args[1]) != 12) {
-    return VException("encrypt requires a 16-byte key Buffer, a 12-byte " \
+    return NanThrowError("encrypt requires a 16-byte key Buffer, a 12-byte " \
                       "IV Buffer, a plaintext Buffer and an auth_data " \
                       "Buffer parameter");
   }
@@ -125,22 +86,23 @@ Handle<Value> GcmEncrypt(const Arguments& args) {
 
   // Create the return buffers and object
   // We strip padding from the ciphertext
-  Local<Object> ciphertext_buf = MakeBuffer(ciphertext, plaintext_len);
-  Local<Object> auth_tag_buf = MakeBuffer(auth_tag, AUTH_TAG_LEN);
-  Local<Object> return_obj = Object::New();
-  return_obj->Set(String::NewSymbol("ciphertext"), ciphertext_buf);
-  return_obj->Set(String::NewSymbol("auth_tag"), auth_tag_buf);
+  Local<Object> ciphertext_buf = NanBufferUse((char*)ciphertext,
+                                              plaintext_len);
+  Local<Object> auth_tag_buf = NanBufferUse((char*)auth_tag, AUTH_TAG_LEN);
+  Local<Object> return_obj = NanNew<Object>();
+  return_obj->Set(NanNew<String>("ciphertext"), ciphertext_buf);
+  return_obj->Set(NanNew<String>("auth_tag"), auth_tag_buf);
 
   // Return it
-  return scope.Close(return_obj);
+  NanReturnValue(return_obj);
 }
 
 // Perform GCM mode AES-128 decryption using the provided key, IV, ciphertext,
 // auth_data and auth_tag buffers, and return an object containing a "plaintext"
 // buffer and an "auth_ok" boolean.
 
-Handle<Value> GcmDecrypt(const Arguments& args) {
-  HandleScope scope;
+NAN_METHOD(GcmDecrypt) {
+  NanScope();
 
   // We want 5 buffer arguments, key needs to be 16 bytes, IV needs to be
   // 12 bytes, auth_tag needs to be 16 bytes
@@ -149,7 +111,7 @@ Handle<Value> GcmDecrypt(const Arguments& args) {
       !Buffer::HasInstance(args[3]) || !Buffer::HasInstance(args[4]) ||
       Buffer::Length(args[0]) != 16 || Buffer::Length(args[1]) != 12 ||
       Buffer::Length(args[4]) != 16) {
-    return VException("decrypt requires a 16-byte key Buffer, a 12-byte " \
+    return NanThrowError("decrypt requires a 16-byte key Buffer, a 12-byte " \
                       "IV Buffer, a ciphertext Buffer, an auth_data " \
                       "Buffer and a 16-byte auth_tag Buffer parameter");
   }
@@ -192,22 +154,31 @@ Handle<Value> GcmDecrypt(const Arguments& args) {
 
   // Create the return buffer and object
   // We strip padding from the plaintext
-  Local<Object> plaintext_buf = MakeBuffer(plaintext, ciphertext_len);
-  Local<Object> return_obj = Object::New();
-  return_obj->Set(String::NewSymbol("plaintext"), plaintext_buf);
-  return_obj->Set(String::NewSymbol("auth_ok"), Boolean::New(auth_ok));
+  Local<Object> plaintext_buf = NanBufferUse((char*)plaintext,
+                                             ciphertext_len);
+  Local<Object> return_obj = NanNew<Object>();
+  return_obj->Set(NanNew<String>("plaintext"), plaintext_buf);
+  return_obj->Set(NanNew<String>("auth_ok"), NanNew<Boolean>(auth_ok));
 
   // Return it
-  return scope.Close(return_obj);
+  NanReturnValue(return_obj);
 }
 
 // Module init function
 
-void Init(Handle<Object> exports, Handle<Value> module) {
-  exports->Set(String::NewSymbol("encrypt"),
-      FunctionTemplate::New(GcmEncrypt)->GetFunction());
-  exports->Set(String::NewSymbol("decrypt"),
-      FunctionTemplate::New(GcmDecrypt)->GetFunction());
+#if NODE_MODULE_VERSION >= 0x000E
+void Init (Handle<Object> exports, Handle<Value> module, void *) {
+#else
+#if NODE_MODULE_VERSION >= 0x000B
+void Init (Handle<Object> exports, Handle<Value> module) {
+#else
+void Init (Handle<Object> exports) {
+#endif
+#endif
+  exports->Set(NanNew<String>("encrypt"),
+      NanNew<FunctionTemplate>(GcmEncrypt)->GetFunction());
+  exports->Set(NanNew<String>("decrypt"),
+      NanNew<FunctionTemplate>(GcmDecrypt)->GetFunction());
 }
 
 NODE_MODULE(node_aes_gcm, Init)
