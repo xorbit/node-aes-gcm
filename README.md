@@ -1,5 +1,6 @@
 node-aes-gcm
 ============
+[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 
 [AES][] [GCM][] module for [node.js][node] using OpenSSL
 
@@ -106,4 +107,11 @@ The following example is shows an interactive node session using this module to 
   auth_ok: true }
 
 ```
+
+[npm-image]: https://badge.fury.io/js/node-aes-gcm.svg
+[npm-url]: https://npmjs.org/package/node-aes-gcm
+[travis-image]: https://travis-ci.org/xorbit/node-aes-gcm.svg?branch=master
+[travis-url]: https://travis-ci.org/xorbit/node-aes-gcm
+[daviddm-image]: https://david-dm.org/xorbit/node-aes-gcm.svg?theme=shields.io
+[daviddm-url]: https://david-dm.org/xorbit/node-aes-gcm
 
