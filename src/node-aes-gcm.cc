@@ -145,7 +145,8 @@ NAN_METHOD(GcmDecrypt) {
                     Buffer::Length(args[3]));
   // Decrypt ciphertext
   EVP_DecryptUpdate(ctx, plaintext, &outl,
-                    (unsigned char *)Buffer::Data(args[2]),
+                    Buffer::Length(args[2]) ?
+                    (unsigned char *)Buffer::Data(args[2]) : plaintext,
                     Buffer::Length(args[2]));
   // Finalize
   bool auth_ok = EVP_DecryptFinal_ex(ctx, plaintext + outl, &outl);
