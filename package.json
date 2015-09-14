@@ -1,8 +1,11 @@
 {
   "name": "node-aes-gcm",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "AES GCM module for node.js that takes advantage of GCM authentication",
   "main": "build/Release/node_aes_gcm.node",
+  "engines": {
+    "node": ">=0.12"
+  },
   "scripts": {
     "test": "mocha -R spec"
   },
@@ -23,7 +26,10 @@
     "additional authenticated data",
     "AAD"
   ],
-  "author": "Patrick Van Oosterwijck",
+  "author": "Patrick Van Oosterwijck <patrick@silicognition.com>",
+  "contributors": [
+    "Jonathan Lima"
+  ],
   "license": "MIT",
   "gypfile": true,
   "readmeFilename": "README.md",
