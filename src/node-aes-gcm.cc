@@ -22,6 +22,7 @@
  
 #include <node.h>
 #include <nan.h>
+#include <stdio.h>
 #include <openssl/evp.h>
 
 using namespace v8;
@@ -37,23 +38,24 @@ using namespace node;
 // and auth_data buffers, and return an object containing "ciphertext"
 // and "auth_tag" buffers.
 
-NAN_METHOD(GcmEncrypt) {
-  NanScope();
+void GcmEncrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+	Nan::HandleScope scope;
 
   // We want 4 buffer arguments, key needs to be 16 bytes and IV needs to be
   // 12 bytes
-  if (args.Length() < 4 || !Buffer::HasInstance(args[0]) ||
-      !Buffer::HasInstance(args[1]) || !Buffer::HasInstance(args[2]) ||
-      !Buffer::HasInstance(args[3]) || Buffer::Length(args[0]) != 16 ||
-      Buffer::Length(args[1]) != 12) {
-    return NanThrowError("encrypt requires a 16-byte key Buffer, a 12-byte " \
+  if (info.Length() < 4 || !Buffer::HasInstance(info[0]) ||
+      !Buffer::HasInstance(info[1]) || !Buffer::HasInstance(info[2]) ||
+      !Buffer::HasInstance(info[3]) || Buffer::Length(info[0]) != 16 ||
+      Buffer::Length(info[1]) != 12) {
+    Nan::ThrowError("encrypt requires a 16-byte key Buffer, a 12-byte " \
                       "IV Buffer, a plaintext Buffer and an auth_data " \
                       "Buffer parameter");
+	return;
   }
 
   // Make a buffer for the ciphertext that is the same size as the
   // plaintext, but padded to 16 byte increments
-  size_t plaintext_len = Buffer::Length(args[2]);
+  size_t plaintext_len = Buffer::Length(info[2]);
   size_t ciphertext_len = (((plaintext_len - 1) / 16) + 1) * 16;
   unsigned char *ciphertext = new unsigned char[ciphertext_len];
   // Make a authentication tag buffer
@@ -64,19 +66,19 @@ NAN_METHOD(GcmEncrypt) {
   int outl;
   EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
   EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL,
-                    (unsigned char *)Buffer::Data(args[0]),
-                    (unsigned char *)Buffer::Data(args[1]));
+                    (unsigned char *)Buffer::Data(info[0]),
+                    (unsigned char *)Buffer::Data(info[1]));
   // Pass additional authenticated data
   // There is some extra complication here because Buffer::Data seems to
   // return NULL for empty buffers, and NULL makes update not work as we
   // expect it to.  So we force a valid non-NULL pointer for empty buffers.
-  EVP_EncryptUpdate(ctx, NULL, &outl, Buffer::Length(args[3]) ?
-                    (unsigned char *)Buffer::Data(args[3]) : auth_tag,
-                    Buffer::Length(args[3]));
+  EVP_EncryptUpdate(ctx, NULL, &outl, Buffer::Length(info[3]) ?
+                    (unsigned char *)Buffer::Data(info[3]) : auth_tag,
+                    Buffer::Length(info[3]));
   // Encrypt plaintext
   EVP_EncryptUpdate(ctx, ciphertext, &outl,
-                    (unsigned char *)Buffer::Data(args[2]),
-                    Buffer::Length(args[2]));
+                    (unsigned char *)Buffer::Data(info[2]),
+                    Buffer::Length(info[2]));
   // Finalize
   EVP_EncryptFinal_ex(ctx, ciphertext + outl, &outl);
   // Get the authentication tag
@@ -86,39 +88,40 @@ NAN_METHOD(GcmEncrypt) {
 
   // Create the return buffers and object
   // We strip padding from the ciphertext
-  Local<Object> ciphertext_buf = NanBufferUse((char*)ciphertext,
+  Nan::MaybeLocal<Object> ciphertext_buf = Nan::CopyBuffer((char*)ciphertext,
                                               plaintext_len);
-  Local<Object> auth_tag_buf = NanBufferUse((char*)auth_tag, AUTH_TAG_LEN);
-  Local<Object> return_obj = NanNew<Object>();
-  return_obj->Set(NanNew<String>("ciphertext"), ciphertext_buf);
-  return_obj->Set(NanNew<String>("auth_tag"), auth_tag_buf);
+  Nan::MaybeLocal<Object> auth_tag_buf = Nan::CopyBuffer((char*)auth_tag, AUTH_TAG_LEN);
+  Local<Object> return_obj = Nan::New<Object>();
+  Nan::Set(return_obj, Nan::New<String>("ciphertext").ToLocalChecked(), ciphertext_buf.ToLocalChecked());
+  Nan::Set(return_obj, Nan::New<String>("auth_tag").ToLocalChecked(), auth_tag_buf.ToLocalChecked());
 
   // Return it
-  NanReturnValue(return_obj);
+  info.GetReturnValue().Set(return_obj);
 }
 
 // Perform GCM mode AES-128 decryption using the provided key, IV, ciphertext,
 // auth_data and auth_tag buffers, and return an object containing a "plaintext"
 // buffer and an "auth_ok" boolean.
 
-NAN_METHOD(GcmDecrypt) {
-  NanScope();
+void GcmDecrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+	Nan::HandleScope scope;
 
   // We want 5 buffer arguments, key needs to be 16 bytes, IV needs to be
   // 12 bytes, auth_tag needs to be 16 bytes
-  if (args.Length() < 5 || !Buffer::HasInstance(args[0]) ||
-      !Buffer::HasInstance(args[1]) || !Buffer::HasInstance(args[2]) ||
-      !Buffer::HasInstance(args[3]) || !Buffer::HasInstance(args[4]) ||
-      Buffer::Length(args[0]) != 16 || Buffer::Length(args[1]) != 12 ||
-      Buffer::Length(args[4]) != 16) {
-    return NanThrowError("decrypt requires a 16-byte key Buffer, a 12-byte " \
+  if (info.Length() < 5 || !Buffer::HasInstance(info[0]) ||
+      !Buffer::HasInstance(info[1]) || !Buffer::HasInstance(info[2]) ||
+      !Buffer::HasInstance(info[3]) || !Buffer::HasInstance(info[4]) ||
+      Buffer::Length(info[0]) != 16 || Buffer::Length(info[1]) != 12 ||
+      Buffer::Length(info[4]) != 16) {
+    Nan::ThrowError("decrypt requires a 16-byte key Buffer, a 12-byte " \
                       "IV Buffer, a ciphertext Buffer, an auth_data " \
                       "Buffer and a 16-byte auth_tag Buffer parameter");
+	return;
   }
 
   // Make a buffer for the plaintext that is the same size as the
   // ciphertext, but padded to 16 byte increments
-  size_t ciphertext_len = Buffer::Length(args[2]);
+  size_t ciphertext_len = Buffer::Length(info[2]);
   size_t plaintext_len = (((ciphertext_len - 1) / 16) + 1) * 16;
   unsigned char *plaintext = new unsigned char[plaintext_len];
 
@@ -127,26 +130,27 @@ NAN_METHOD(GcmDecrypt) {
   int outl;
   EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
   EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL,
-                    (unsigned char *)Buffer::Data(args[0]),
-                    (unsigned char *)Buffer::Data(args[1]));
+                    (unsigned char *)Buffer::Data(info[0]),
+                    (unsigned char *)Buffer::Data(info[1]));
   // Set the input reference authentication tag
   EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, AUTH_TAG_LEN,
-                    Buffer::Data(args[4]));
+                    Buffer::Data(info[4]));
   // Example showed we needed to do init again
   EVP_DecryptInit_ex(ctx, NULL, NULL,
-                    (unsigned char *)Buffer::Data(args[0]),
-                    (unsigned char *)Buffer::Data(args[1]));
+                    (unsigned char *)Buffer::Data(info[0]),
+                    (unsigned char *)Buffer::Data(info[1]));
   // Pass additional authenticated data
   // There is some extra complication here because Buffer::Data seems to
   // return NULL for empty buffers, and NULL makes update not work as we
   // expect it to.  So we force a valid non-NULL pointer for empty buffers.
-  EVP_DecryptUpdate(ctx, NULL, &outl, Buffer::Length(args[3]) ?
-                    (unsigned char *)Buffer::Data(args[3]) : plaintext,
-                    Buffer::Length(args[3]));
+  EVP_DecryptUpdate(ctx, NULL, &outl, Buffer::Length(info[3]) ?
+                    (unsigned char *)Buffer::Data(info[3]) : plaintext,
+                    Buffer::Length(info[3]));
   // Decrypt ciphertext
   EVP_DecryptUpdate(ctx, plaintext, &outl,
-                    (unsigned char *)Buffer::Data(args[2]),
-                    Buffer::Length(args[2]));
+                    Buffer::Length(info[2]) ?
+                    (unsigned char *)Buffer::Data(info[2]) : plaintext,
+                    Buffer::Length(info[2]));
   // Finalize
   bool auth_ok = EVP_DecryptFinal_ex(ctx, plaintext + outl, &outl);
   // Free the OpenSSL interface structure
@@ -154,32 +158,23 @@ NAN_METHOD(GcmDecrypt) {
 
   // Create the return buffer and object
   // We strip padding from the plaintext
-  Local<Object> plaintext_buf = NanBufferUse((char*)plaintext,
+  Nan::MaybeLocal<Object> plaintext_buf = Nan::CopyBuffer((char*)plaintext,
                                              ciphertext_len);
-  Local<Object> return_obj = NanNew<Object>();
-  return_obj->Set(NanNew<String>("plaintext"), plaintext_buf);
-  return_obj->Set(NanNew<String>("auth_ok"), NanNew<Boolean>(auth_ok));
+  Local<Object> return_obj = Nan::New<Object>();
+  Nan::Set(return_obj, Nan::New<String>("plaintext").ToLocalChecked(), plaintext_buf.ToLocalChecked());
+  Nan::Set(return_obj, Nan::New<String>("auth_ok").ToLocalChecked(), Nan::New<Boolean>(auth_ok));
 
   // Return it
-  NanReturnValue(return_obj);
+  info.GetReturnValue().Set(return_obj);
 }
 
 // Module init function
-
-#if NODE_MODULE_VERSION >= 0x000E
-void Init (Handle<Object> exports, Handle<Value> module, void *) {
-#else
-#if NODE_MODULE_VERSION >= 0x000B
-void Init (Handle<Object> exports, Handle<Value> module) {
-#else
-void Init (Handle<Object> exports) {
-#endif
-#endif
-  exports->Set(NanNew<String>("encrypt"),
-      NanNew<FunctionTemplate>(GcmEncrypt)->GetFunction());
-  exports->Set(NanNew<String>("decrypt"),
-      NanNew<FunctionTemplate>(GcmDecrypt)->GetFunction());
+void InitAll(Handle<Object> exports) {
+  Nan::Set(exports, Nan::New<String>("encrypt").ToLocalChecked(),
+      Nan::GetFunction(Nan::New<FunctionTemplate>(GcmEncrypt)).ToLocalChecked());
+  Nan::Set(exports, Nan::New<String>("decrypt").ToLocalChecked(),
+      Nan::GetFunction(Nan::New<FunctionTemplate>(GcmDecrypt)).ToLocalChecked());
 }
 
-NODE_MODULE(node_aes_gcm, Init)
+NODE_MODULE(node_aes_gcm, InitAll)
 
