@@ -22,7 +22,6 @@
  
 #include <node.h>
 #include <nan.h>
-#include <stdio.h>
 #include <openssl/evp.h>
 
 using namespace v8;
@@ -50,7 +49,7 @@ void GcmEncrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     Nan::ThrowError("encrypt requires a 16-byte key Buffer, a 12-byte " \
                       "IV Buffer, a plaintext Buffer and an auth_data " \
                       "Buffer parameter");
-	return;
+    return;
   }
 
   // Make a buffer for the ciphertext that is the same size as the
@@ -90,10 +89,13 @@ void GcmEncrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   // We strip padding from the ciphertext
   Nan::MaybeLocal<Object> ciphertext_buf = Nan::CopyBuffer((char*)ciphertext,
                                               plaintext_len);
-  Nan::MaybeLocal<Object> auth_tag_buf = Nan::CopyBuffer((char*)auth_tag, AUTH_TAG_LEN);
+  Nan::MaybeLocal<Object> auth_tag_buf = Nan::CopyBuffer((char*)auth_tag,
+                                              AUTH_TAG_LEN);
   Local<Object> return_obj = Nan::New<Object>();
-  Nan::Set(return_obj, Nan::New<String>("ciphertext").ToLocalChecked(), ciphertext_buf.ToLocalChecked());
-  Nan::Set(return_obj, Nan::New<String>("auth_tag").ToLocalChecked(), auth_tag_buf.ToLocalChecked());
+  Nan::Set(return_obj, Nan::New<String>("ciphertext").ToLocalChecked(),
+            ciphertext_buf.ToLocalChecked());
+  Nan::Set(return_obj, Nan::New<String>("auth_tag").ToLocalChecked(),
+            auth_tag_buf.ToLocalChecked());
 
   // Return it
   info.GetReturnValue().Set(return_obj);
@@ -161,8 +163,10 @@ void GcmDecrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   Nan::MaybeLocal<Object> plaintext_buf = Nan::CopyBuffer((char*)plaintext,
                                              ciphertext_len);
   Local<Object> return_obj = Nan::New<Object>();
-  Nan::Set(return_obj, Nan::New<String>("plaintext").ToLocalChecked(), plaintext_buf.ToLocalChecked());
-  Nan::Set(return_obj, Nan::New<String>("auth_ok").ToLocalChecked(), Nan::New<Boolean>(auth_ok));
+  Nan::Set(return_obj, Nan::New<String>("plaintext").ToLocalChecked(),
+            plaintext_buf.ToLocalChecked());
+  Nan::Set(return_obj, Nan::New<String>("auth_ok").ToLocalChecked(),
+            Nan::New<Boolean>(auth_ok));
 
   // Return it
   info.GetReturnValue().Set(return_obj);
@@ -171,9 +175,11 @@ void GcmDecrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 // Module init function
 void InitAll(Handle<Object> exports) {
   Nan::Set(exports, Nan::New<String>("encrypt").ToLocalChecked(),
-      Nan::GetFunction(Nan::New<FunctionTemplate>(GcmEncrypt)).ToLocalChecked());
+            Nan::GetFunction(Nan::New<FunctionTemplate>(GcmEncrypt))
+            .ToLocalChecked());
   Nan::Set(exports, Nan::New<String>("decrypt").ToLocalChecked(),
-      Nan::GetFunction(Nan::New<FunctionTemplate>(GcmDecrypt)).ToLocalChecked());
+            Nan::GetFunction(Nan::New<FunctionTemplate>(GcmDecrypt))
+            .ToLocalChecked());
 }
 
 NODE_MODULE(node_aes_gcm, InitAll)
