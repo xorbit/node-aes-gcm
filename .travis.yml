@@ -13,6 +13,8 @@ install:
   - $CXX --version
   - npm install
 node_js:
+  - '6.7.0'
+  - '4.6.0'
   - 'iojs'
   - '4.0'
   - '0.12'
