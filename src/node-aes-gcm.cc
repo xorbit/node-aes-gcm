@@ -47,12 +47,12 @@ using namespace node;
 void GcmEncrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 	Nan::HandleScope scope;
 	const EVP_CIPHER *cipher_type = NULL;
-	size_t key_len = 0;
+	int key_len = 0;
 
   // The key needs to be 16, 24 or 32 bytes and determines the encryption
   // bit level used
   if (info.Length() >= 1 && Buffer::HasInstance(info[0])) {
-    key_len = Buffer::Length(info[0]);
+    key_len = (int)Buffer::Length(info[0]);
     switch (key_len) {
     case 16:
       cipher_type = EVP_aes_128_gcm();
@@ -93,7 +93,7 @@ void GcmEncrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   EVP_EncryptInit_ex(ctx, cipher_type, NULL, NULL, NULL);
   // Set the IV length
   EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN,
-                    Buffer::Length(info[1]), NULL);
+                    (int)Buffer::Length(info[1]), NULL);
   // Init OpenSSL interace with the key and IV
   EVP_EncryptInit_ex(ctx, NULL, NULL,
                     (unsigned char *)Buffer::Data(info[0]),
@@ -138,14 +138,14 @@ void GcmEncrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 // The key length determines the encryption bit level used.
 
 void GcmDecrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-	Nan::HandleScope scope;
-	const EVP_CIPHER *cipher_type = NULL;
-	size_t key_len = 0;
+  Nan::HandleScope scope;
+  const EVP_CIPHER *cipher_type = NULL;
+  int key_len = 0;
 
   // The key needs to be 16, 24 or 32 bytes and determines the encryption
   // bit level used
   if (info.Length() >= 1 && Buffer::HasInstance(info[0])) {
-    key_len = Buffer::Length(info[0]);
+    key_len = (int)Buffer::Length(info[0]);
     switch (key_len) {
     case 16:
       cipher_type = EVP_aes_128_gcm();
@@ -186,7 +186,7 @@ void GcmDecrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   EVP_DecryptInit_ex(ctx, cipher_type, NULL, NULL, NULL);
   // Set the IV length
   EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN,
-                    Buffer::Length(info[1]), NULL);
+                    (int)Buffer::Length(info[1]), NULL);
   // Init OpenSSL interace with the key and IV
   EVP_DecryptInit_ex(ctx, NULL, NULL,
                     (unsigned char *)Buffer::Data(info[0]),
