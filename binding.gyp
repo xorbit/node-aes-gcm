@@ -13,17 +13,16 @@
               'variables': {
                 'openssl_root%': 'C:/OpenSSL-Win64'
               },
+	      'libraries': ['<(openssl_root)/lib/<!@(dir /B C:\OpenSSL-Win64\lib\libeay32.lib C:\OpenSSL-Win64\lib\libcrypto.lib)'],
             }, {
               'variables': {
                 'openssl_root%': 'C:/OpenSSL-Win32'
               },
+	      'libraries': ['<(openssl_root)/lib/<!@(dir /B C:\OpenSSL-Win32\lib\libeay32.lib C:\OpenSSL-Win32\lib\libcrypto.lib)'],
             }],
           ],
           'defines': [
             'uint=unsigned int',
-          ],
-          'libraries': [ 
-            '-l<(openssl_root)/lib/libeay32.lib',
           ],
           'include_dirs': [
             '<(openssl_root)/include',
