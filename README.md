@@ -9,6 +9,7 @@ node-aes-gcm
 [GCMr]: http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf
 [node]: http://nodejs.org
 [crypto]: http://nodejs.org/api/crypto.html
+[cryptogcm]: http://lollyrock.com/articles/nodejs-encryption/
 [OpenSSL]: http://www.openssl.org/
 [IV]: http://en.wikipedia.org/wiki/Initialization_vector
 
@@ -24,11 +25,11 @@ $ npm install node-aes-gcm
 Rationale
 ---------
 
-The reason for the existence of this module is that the [node.js][node] [crypto][] module does not seem to expose a way to use the ability of [GCM (Galois Counter Mode)][GCM] to perform both encryption and authentication simultaneously.  This functionality is available in [OpenSSL][] 1.0+, so this module provides a thin wrapper around [OpenSSL][] to expose this functionality for use in [node.js][node].
+The reason for the existence of this module is that the [node.js][node] [crypto][] module didn't use to expose a way to make use of the ability of [GCM (Galois Counter Mode)][GCM] to perform both encryption and authentication simultaneously when I needed it.  Since this functionality was available in [OpenSSL][] 1.0+, I wrote this thin wrapper around [OpenSSL][] to expose this functionality for use in [node.js][node].  Apparently, this functionality is now also available using the standard [crypto][] module as shown [in this example][cryptogcm].
 
 [GCM][] is a useful mode to communicate securely with small embedded devices, because of its low operating overhead.  When combined with [node.js][node], large scalable systems can be designed. Another advantage is that it is unencumbered by patents.
 
-This module was written for my own use and is not designed to be extremely flexible, but to provide support for the most common use case of [GCM][] in embedded systems.  It uses the [AES-128][AES] cipher (128-bit key), supports a 96-bit [initialization vector][IV] (IV), and generates a 128-bit authentication tag.  It does include support for additional authenticated data (AAD).
+While this module was originally written for my own use and was limited to a [AES-128][AES] cipher (128-bit key) and 96-bit [initialization vector][IV] (IV), the current version supports AES-128, AES-192 and AES-256 with any length of IV.  It generates a 128-bit authentication tag and includes support for additional authenticated data (AAD).
 
 The module exports 2 functions: `encrypt` and `decrypt`.
 
@@ -39,8 +40,8 @@ encrypt
 
 #### encrypt(key, iv, plaintext, aad)
 
-* `key` is a 16-byte `Buffer` object containing the [AES][] key used for encryption.
-* `iv` is a 12-byte `Buffer` object containing the initialization vector.
+* `key` is a 16, 24 or 32-byte `Buffer` object containing the [AES][] key used for encryption.
+* `iv` is a `Buffer` object containing the initialization vector.
 * `plaintext` is a `Buffer` object containing the plaintext to be encrypted.
 * `aad` is a `Buffer` object containing the additional authenticated data that is not encrypted but is anthenticated by the authentication tag.
 
@@ -65,8 +66,8 @@ decrypt
 
 #### decrypt(key, iv, ciphertext, aad, auth_tag)
 
-* `key` is a 16-byte `Buffer` object containing the [AES][] key used for encryption.
-* `iv` is a 12-byte `Buffer` object containing the initialization vector.
+* `key` is a 16, 24 or 32-byte `Buffer` object containing the [AES][] key used for encryption.
+* `iv` is a `Buffer` object containing the initialization vector.
 * `ciphertext` is a `Buffer` object containing the ciphertext to be decrypted.
 * `aad` is a `Buffer` object containing the additional authenticated data that was used when encryption was done and that is hashed into the authentication tag.
 * `auth_tag` is a 16-byte `Buffer` object containing the authentication tag that verifies the correctness and authenticity of both the encrypted data end the additional authenticated data.
@@ -85,8 +86,8 @@ The `decrypt` function returns an object containing the following items:
 * `plaintext` is a `Buffer` object containing the decrypted data.
 * `auth_ok` is a Boolean indicating whether the encrypted data and additional authenticated data passed verification (`true`) or failed (`false`).
 
-Example
--------
+Examples
+--------
 
 The following example is shows an interactive node session using this module to execute Test Case 3 from the NIST [GCM revised spec][GCMr]:
 
@@ -107,6 +108,8 @@ The following example is shows an interactive node session using this module to 
   auth_ok: true }
 
 ```
+
+An extensive test script is provided that covers all NIST [GCM revised spec][GCMr] test cases and can be used as a reference example.
 
 [npm-image]: https://badge.fury.io/js/node-aes-gcm.svg
 [npm-url]: https://npmjs.org/package/node-aes-gcm
