@@ -82,9 +82,9 @@ void GcmEncrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   // plaintext, but padded to key size increments
   int plaintext_len = (int)Buffer::Length(info[2]);
   int ciphertext_len = (((plaintext_len - 1) / key_len) + 1) * key_len;
-  unsigned char *ciphertext = new unsigned char[ciphertext_len];
+  unsigned char *ciphertext = (unsigned char *)malloc(ciphertext_len);
   // Make a authentication tag buffer
-  unsigned char *auth_tag = new unsigned char[AUTH_TAG_LEN];
+  unsigned char *auth_tag = (unsigned char *)malloc(AUTH_TAG_LEN);
 
   // Create the OpenSSL context
   int outl;
@@ -118,9 +118,9 @@ void GcmEncrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
   // Create the return buffers and object
   // We strip padding from the ciphertext
-  Nan::MaybeLocal<Object> ciphertext_buf = Nan::CopyBuffer((char*)ciphertext,
+  Nan::MaybeLocal<Object> ciphertext_buf = Nan::NewBuffer((char*)ciphertext,
                                               (uint32_t)plaintext_len);
-  Nan::MaybeLocal<Object> auth_tag_buf = Nan::CopyBuffer((char*)auth_tag,
+  Nan::MaybeLocal<Object> auth_tag_buf = Nan::NewBuffer((char*)auth_tag,
                                               AUTH_TAG_LEN);
   Local<Object> return_obj = Nan::New<Object>();
   Nan::Set(return_obj, Nan::New<String>("ciphertext").ToLocalChecked(),
@@ -177,7 +177,7 @@ void GcmDecrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   // ciphertext, but padded to key size increments
   int ciphertext_len = (int)Buffer::Length(info[2]);
   int plaintext_len = (((ciphertext_len - 1) / key_len) + 1) * key_len;
-  unsigned char *plaintext = new unsigned char[plaintext_len];
+  unsigned char *plaintext = (unsigned char *)malloc(plaintext_len);
 
   // Create the OpenSSL context
   int outl;
@@ -213,7 +213,7 @@ void GcmDecrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
   // Create the return buffer and object
   // We strip padding from the plaintext
-  Nan::MaybeLocal<Object> plaintext_buf = Nan::CopyBuffer((char*)plaintext,
+  Nan::MaybeLocal<Object> plaintext_buf = Nan::NewBuffer((char*)plaintext,
                                              (uint32_t)ciphertext_len);
   Local<Object> return_obj = Nan::New<Object>();
   Nan::Set(return_obj, Nan::New<String>("plaintext").ToLocalChecked(),
