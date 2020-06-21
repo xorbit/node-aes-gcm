@@ -226,11 +226,11 @@ void GcmDecrypt(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 // Module init function
-void InitAll(Handle<Object> exports) {
-  Nan::Set(exports, Nan::New<String>("encrypt").ToLocalChecked(),
+NAN_MODULE_INIT(InitAll) {
+  Nan::Set(target, Nan::New<String>("encrypt").ToLocalChecked(),
             Nan::GetFunction(Nan::New<FunctionTemplate>(GcmEncrypt))
             .ToLocalChecked());
-  Nan::Set(exports, Nan::New<String>("decrypt").ToLocalChecked(),
+  Nan::Set(target, Nan::New<String>("decrypt").ToLocalChecked(),
             Nan::GetFunction(Nan::New<FunctionTemplate>(GcmDecrypt))
             .ToLocalChecked());
 }
